@@ -149,7 +149,8 @@ actor ClusterService {
     echo @@qos; q=$(sacctmgr -n -P show assoc user=$(whoami) format=DefaultQOS | grep . | head -1)
     sacctmgr -n -P show qos "${q:-normal}" format=Name,MaxJobsPU,MaxTRESPU
     echo @@mymem; ids=$(squeue -h -u $(whoami) -t R -o %i | paste -sd, -)
-    [ -n "$ids" ] && sstat -a -n -P -j "$ids" -o JobID,MaxRSS 2>/dev/null
+    if [ -n "$ids" ]; then sstat -a -n -P -j "$ids" -o JobID,MaxRSS 2>/dev/null; fi
+    true
     """
 
     private static let cacheURL: URL = {
@@ -165,7 +166,9 @@ actor ClusterService {
                                   ["-o", "BatchMode=yes", "-o", "ConnectTimeout=15", "-o", "ServerAliveInterval=10",
                                    host, Self.script],
                                   timeout: 60)
-        guard let out, out.status == 0 else {
+        // ssh itself exits 255 when it can't connect; any other status comes from the remote script,
+        // so judge that by whether the output parses (an optional step failing shouldn't hide the data).
+        guard let out, out.status != 255, !out.stdout.isEmpty else {
             let detail = out?.stderr.split(separator: "\n").last.map(String.init) ?? ""
             return .failure(.unreachable(detail.trimmingCharacters(in: .whitespaces)))
         }
