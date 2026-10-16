@@ -12,11 +12,10 @@ struct PopoverView: View {
         VStack(alignment: .leading, spacing: 14) {
             header
             if let s = store.snapshot {
+                YourJobsCard(snapshot: s)
                 resources(s)
                 Divider()
                 nodes(s)
-                Divider()
-                you(s)
                 Divider()
                 queue(s)
             } else if store.needsSetup {
@@ -131,44 +130,6 @@ struct PopoverView: View {
                 }
             }
             .font(.system(size: 11))
-        }
-    }
-
-    // MARK: You
-
-    private func you(_ s: ClusterSnapshot) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("You").font(.system(size: 12, weight: .semibold))
-                Text(s.user).font(.system(size: 10.5)).foregroundStyle(.secondary)
-                Spacer()
-                if let q = s.limits?.qos {
-                    Text("QOS \(q) limits").font(.system(size: 10.5)).foregroundStyle(.secondary)
-                }
-            }
-            Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 4) {
-                GridRow {
-                    stat("Running", "\(s.myRunning.count)", s.limits?.maxJobs.map { "/ \($0) jobs" } ?? "jobs")
-                    stat("CPUs", "\(s.myCPU)", s.limits?.maxCPU.map { "/ \($0)" } ?? "")
-                    stat("Memory reserved", Fmt.mem(s.myMem), s.limits?.maxMem.map { "/ \(Fmt.mem($0))" } ?? "")
-                    stat("Pending jobs", "\(s.myPending.count)", "")
-                }
-            }
-            if let used = s.myMemUsed, s.myMem > 0 {
-                Text("Actually using \(Fmt.mem(used)) of the \(Fmt.mem(s.myMem)) reserved (\(Int((used / s.myMem * 100).rounded()))%, each job's peak so far).")
-                    .font(.system(size: 11)).foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-    }
-
-    private func stat(_ label: String, _ value: String, _ suffix: String) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text(label).font(.system(size: 10.5)).foregroundStyle(.secondary)
-            HStack(alignment: .firstTextBaseline, spacing: 3) {
-                Text(value).font(.system(size: 13, weight: .semibold, design: .rounded)).monospacedDigit()
-                Text(suffix).font(.system(size: 10.5)).foregroundStyle(.secondary)
-            }
         }
     }
 

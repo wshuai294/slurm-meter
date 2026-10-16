@@ -11,10 +11,10 @@ A tiny native macOS menu bar app + desktop widget that shows how busy your **SLU
 
 ## Features
 
+- **Your jobs, front and center** — running jobs, CPUs and pending jobs in large type, with bars against your QOS per-user limits. Memory shows both what your running jobs actually **use** (sum of each job's peak so far, from `sstat`) and what they **reserve**, on one bar up to your limit.
 - **Menu bar** — free CPUs and memory at a glance: `1,400 CPU · 15T`.
 - **Free resources** — CPUs, memory and GPUs that SLURM can still allocate on nodes accepting jobs. Memory is `RealMemory − AllocMem` (what the scheduler sees), not the OS's free memory.
 - **Node map** — one square per node, one row per node type (`64c · 768G`). Color shows how allocated the node is (CPU or memory, whichever is higher): green < 50%, yellow < 75%, orange < 90%, red ≥ 90%, gray = down. Hover for details.
-- **You** — your running jobs, CPUs and memory against your QOS per-user limits, and your pending jobs. Memory shows both what your running jobs actually **use** (sum of each job's peak so far, from `sstat`) and what they **reserve**.
 - **Queue** — running / pending jobs and why jobs are pending.
 - **Desktop widget** — sits on the desktop behind your windows; right-click for always-on-top, settings, hide, or quit. Drag to move. Double-click the app to bring a hidden widget back.
 - Refreshes every 10 minutes (5 / 10 / 30 in the gear menu), on wake, and when you open the popover if the data is over 2 minutes old. Keeps showing the last data if the cluster can't be reached.
@@ -67,7 +67,7 @@ build/SlurmMeter.app/Contents/MacOS/SlurmMeter --snapshot out --demo  # render s
 |---|---|
 | `Sources/Cluster.swift` | SSH call, parsing of `scontrol` / `squeue` / `sacctmgr` / `sstat`, derived numbers |
 | `Sources/ClusterStore.swift` | refresh timer, settings, app state |
-| `Sources/PopoverView.swift`, `Widget.swift`, `NodeMap.swift`, `Support.swift` | UI |
+| `Sources/YourJobs.swift`, `PopoverView.swift`, `Widget.swift`, `NodeMap.swift`, `Support.swift` | UI |
 | `Sources/Snapshot.swift` | screenshot / demo mode |
 
 ## License

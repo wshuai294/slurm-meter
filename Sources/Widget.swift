@@ -129,21 +129,22 @@ struct WidgetView: View {
             }
 
             if let s = store.snapshot {
+                YourJobsCard(snapshot: s)
                 HStack(alignment: .top, spacing: 0) {
                     Ring(used: s.cpuTotal > 0 ? 1 - Double(s.cpuFree) / Double(s.cpuTotal) : 0,
-                         center: Fmt.count(s.cpuFree), label: "CPUs free")
+                         center: Fmt.count(s.cpuFree), label: "CPUs free", size: 46, line: 5)
                     Spacer(minLength: 0)
                     Ring(used: s.memTotal > 0 ? 1 - s.memFree / s.memTotal : 0,
-                         center: Fmt.mem(s.memFree), label: "Memory free")
+                         center: Fmt.mem(s.memFree), label: "Memory free", size: 46, line: 5)
                     if !s.gpuNodes.isEmpty {
                         Spacer(minLength: 0)
                         Ring(used: s.gpuTotal > 0 ? 1 - Double(s.gpuFree) / Double(s.gpuTotal) : 1,
-                             center: "\(s.gpuFree)/\(s.gpuTotal)", label: "GPUs free")
+                             center: "\(s.gpuFree)/\(s.gpuTotal)", label: "GPUs free", size: 46, line: 5)
                     }
                 }
-                .padding(.horizontal, 10)
-                you(s)
-                NodeMap(snapshot: s, width: width - 2 * padding, cell: 7, gap: 2, labelWidth: 62, labelSize: 9, hover: $hover)
+                .padding(.horizontal, 16)
+                NodeMap(snapshot: s, width: width - 2 * padding, cell: 5, gap: 1.5, labelWidth: 50, labelSize: 8, hover: $hover)
+                    .opacity(0.9)
                 if let hover {
                     Text(hover).font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1)
                 }
@@ -177,49 +178,6 @@ struct WidgetView: View {
             Divider()
             Button("Hide widget (double-click the app to show again)") { WidgetController.shared.hide() }
             Button("Quit SLURM Meter") { NSApp.terminate(nil) }
-        }
-    }
-
-    /// The user's own usage against their per-user limits.
-    private func you(_ s: ClusterSnapshot) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 0) {
-                stat("Your jobs", "\(s.myRunning.count)", s.limits?.maxJobs.map { "/\($0)" })
-                Spacer(minLength: 0)
-                stat("Your CPUs", "\(s.myCPU)", s.limits?.maxCPU.map { "/\($0)" })
-                Spacer(minLength: 0)
-                stat("Pending jobs", "\(s.myPending.count)", nil)
-            }
-            VStack(alignment: .leading, spacing: 1) {
-                Text("Your memory").font(.system(size: 9.5)).foregroundStyle(.secondary)
-                HStack(alignment: .firstTextBaseline, spacing: 3) {
-                    if let used = s.myMemUsed {
-                        Text("\(Fmt.mem(used)) used").font(.system(size: 12, weight: .semibold, design: .rounded))
-                        Text("/").foregroundStyle(.secondary)
-                    }
-                    Text("\(Fmt.mem(s.myMem)) reserved").font(.system(size: 12, weight: .semibold, design: .rounded))
-                    if let max = s.limits?.maxMem {
-                        Text("(limit \(Fmt.mem(max)))").font(.system(size: 10)).foregroundStyle(.secondary)
-                    }
-                }
-                .monospacedDigit()
-            }
-            .help("Used = the sum of each running job's peak memory so far (sstat MaxRSS). Reserved = the memory your jobs requested, which SLURM holds for them.")
-        }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-    }
-
-    private func stat(_ label: String, _ value: String, _ limit: String?) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text(label).font(.system(size: 9.5)).foregroundStyle(.secondary)
-            HStack(alignment: .firstTextBaseline, spacing: 1) {
-                Text(value).font(.system(size: 12, weight: .semibold, design: .rounded))
-                if let limit { Text(limit).font(.system(size: 10)).foregroundStyle(.secondary) }
-            }
-            .monospacedDigit()
         }
     }
 }

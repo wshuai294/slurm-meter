@@ -121,6 +121,7 @@ struct ClusterSnapshot: Sendable {
         case "JobArrayTaskLimit": return "array throttle (%)"
         case "JobHeldUser", "JobHeldAdmin": return "held"
         case "BeginTime": return "scheduled for later"
+        case "None": return "about to start"
         case "DependencyNeverSatisfied": return "dependency failed"
         default: return r.hasPrefix("ReqNodeNotAvail") ? "requested nodes unavailable" : r
         }
